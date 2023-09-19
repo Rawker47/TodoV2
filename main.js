@@ -82,7 +82,7 @@ Item.insertMany(defaultItems)
   });
 
 main.get("/", (req, res) => {
-  res.render("index", { Title: "First Page", newListItem: items });
+  res.render("index", { Title: "First Page", newListItem: defaultItems });
 });
 
 main.post("/", function (req, res) {
@@ -91,7 +91,7 @@ main.post("/", function (req, res) {
     workList.push(item);
     res.redirect("/work");
   } else {
-    items.push(item);
+    defaultItems.push(item);
     res.redirect("/");
   }
 });
