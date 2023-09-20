@@ -73,50 +73,48 @@ const item3 = new Item({
 });
 const defaultItems = [item1, item2, item3];
 
-Item.insertMany(defaultItems)
-  .then((resolove) => {
-    console.log("Hippy ");
-  })
-  .catch((err) => {
-    console.log("BOO! ");
-  });
-
-main.get("/", (req, res) => {
-  res.render("index", { Title: "First Page", newListItem: defaultItems });
+main.get("/", function (req, res) {
+  Item.find({})
+    .then((foundItems) => {
+      if (foundItems.length === 0) {
+        Item.insertMany(defaultItems)
+          .then((docs) => {
+            console.log("Documents inserted successfully:", docs);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        res.redirect("/");
+      } else {
+        res.render("index", { Title: "Today", newListItem: foundItems });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 main.post("/", function (req, res) {
-  const item = req.body.newList;
-  if (req.body.item == "work") {
-    workList.push(item);
-    res.redirect("/work");
-  } else {
-    defaultItems.push(item);
-    res.redirect("/");
-  }
+  const itemName = req.body.newList;
+
+  const item = new Item({
+    name: itemName,
+  });
+  item.save();
+  res.redirect("/");
+});
+main.post("/delete", function (req, res) {
+  const checkBoxId = req.body.checkboxName;
+  Item.findByIdAndDelete(checkBoxId)
+    .then((success) => {
+      console.log("this is a great success!", success);
+      res.redirect("/");
+    })
+    .catch((error) => {
+      console.log("Sorry for the error!");
+    });
 });
 
-// main.get("/", function (req, res) {
-//   Item.find({})
-//     .then((foundItems) => {
-//       if (foundItems.length === 0) {
-//         Item.insertMany(defaultItems)
-//           .then((docs) => {
-//             console.log("Documents inserted successfully:", docs);
-//           })
-//           .catch((error) => {
-//             console.error(error);
-//           });
-//         res.redirect("/");
-//       } else {
-//         res.render("index", { Title: "Today", newListItems: foundItems });
-//       }
-//     })
-
-//     .catch((err) => {
-//       console.error(err);
-//     });
-// });
 main.listen(4000, () => {
   console.log(`Todo version 2 is listening on port : ${port}`);
 });
